@@ -1,0 +1,71 @@
+from sqlalchemy import create_engine
+import io
+import psycopg2
+
+def create_table(df, table_name, URI=URI):
+
+  engine = create_engine(URI)
+  print('connected to the db..')
+
+  df.head(0).to_sql(table_name, engine, if_exists='replace', index=False)
+
+
+def populate_table(df, table_name, URI=URI):
+
+    engine = create_engine(URI)
+    print('connected to the database..')
+    
+    df.head(0).to_sql(table_name, engine, if_exists='replace',index=False) 
+
+    conn = engine.raw_connection()
+    cur = conn.cursor()
+    print('creating the cursor..')
+
+    output = io.StringIO()
+    
+    print('writing the csv to file..')
+    
+    df.to_csv(output, sep='\t', header=False, index=False)
+    output.seek(0)
+    
+    
+    contents = output.getvalue()
+    
+    cur.copy_from(output, table_name, null="") # null values become ''
+    
+    cur.close()
+    conn.commit()
+    conn.close()
+    
+
+def insert_into_table(df, table_name, URI=URI):
+
+  engine = create_engine(URI)
+
+  conn = engine.raw_connection()
+  cur = conn.cursor()
+
+  output = io.StringIO()
+
+  df.to_csv(output, sep='\t', header=False, index=False)
+  output.seek(0)
+
+  contents = output.getvalue()
+
+  cur.copy_from(output, table_name, null="")
+
+  conn.commit()
+  cur.close()
+  conn.close()
+  
+
+def drop_table(table_name, URI):
+  
+  psyco_conn = psycopg2.connect(URI)
+  cursor = psyco_conn.cursor()
+  psyco_conn.autocommit = True
+
+  cursor.execute("""DROP TABLE %s;"""%table_name)
+  cursor.close()
+  psyco_conn.close()
+    
