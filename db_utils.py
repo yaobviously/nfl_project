@@ -2,6 +2,20 @@ from sqlalchemy import create_engine
 import io
 import psycopg2
 
+# loading up the postgres credentials in a separate file. we could use environment variables
+# but doing it this way to mix it up!
+
+with open('../env.txt', 'r') as file:
+    env = file.read().splitlines()
+    user = env[0]
+    password = env[1]
+    host = env[2]
+    database = env[3]
+    port = env[4]
+
+URI = f'postgresql://{user}:{password}@{host}:{port}/{database}'
+
+
 def create_table(df=None, table_name=None, URI=None):
     """
     Creates a table in the database
@@ -21,36 +35,35 @@ def create_table(df=None, table_name=None, URI=None):
 def populate_table(df=None, table_name=None, URI=None):
     """
     Populate the table in the db with data from the dataframe.
-    
+
     The method here is quite fast. It uses the copy_from method from
     the psycopg2 library.
     """
 
     engine = create_engine(URI)
     print('connected to the database..')
-    
-    df.head(0).to_sql(table_name, engine, if_exists='replace',index=False) 
+
+    df.head(0).to_sql(table_name, engine, if_exists='replace', index=False)
 
     conn = engine.raw_connection()
     cur = conn.cursor()
     print('creating the cursor..')
 
     output = io.StringIO()
-    
+
     print('writing the csv to file..')
-    
+
     df.to_csv(output, sep='\t', header=False, index=False)
     output.seek(0)
-    
-    
+
     contents = output.getvalue()
-    
-    cur.copy_from(output, table_name, null="") # null values become ''
-    
+
+    cur.copy_from(output, table_name, null="")  # null values become ''
+
     cur.close()
     conn.commit()
     conn.close()
-    
+
 
 def insert_into_table(df=None, table_name=None, URI=None):
     """
@@ -74,19 +87,18 @@ def insert_into_table(df=None, table_name=None, URI=None):
     conn.commit()
     cur.close()
     conn.close()
-  
+
 
 def drop_table(table_name=None, URI=None):
     """
     Drop a table from the database. 
-    
+
     """
-  
+
     psyco_conn = psycopg2.connect(URI)
     cursor = psyco_conn.cursor()
     psyco_conn.autocommit = True
 
-    cursor.execute("""DROP TABLE %s;"""%table_name)
+    cursor.execute("""DROP TABLE %s;""" % table_name)
     cursor.close()
     psyco_conn.close()
-    
