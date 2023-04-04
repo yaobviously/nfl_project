@@ -80,10 +80,12 @@ def insert_into_table(df=None, table_name=None, URI=None):
 
     except (psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
         print(f"Error: unable to insert data into the table. {e}")
+        print(df.index[-1])
         conn.rollback()
 
     except Exception as e:
         print(f"Error: {e}")
+        print(df.index[-1])
 
     finally:
         cur.close()
