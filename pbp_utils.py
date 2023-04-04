@@ -4,6 +4,15 @@ import numpy as np
 
 
 def get_qb_pass(df: pd.DataFrame = None):
+    """
+    Get QB passing statistics
+
+    Args:
+        df (pd.DataFrame): Must be a pandas dataframe with play by play data
+
+    Returns:
+        df: Pandas dataframe with QB passing statistics
+    """
     qb_df = (
         df.loc[((df['pass_attempt'] == 1) & (
             ~df['play_type'].isin(['two_point_att']) & (df['sack'] == 0)))]
@@ -117,6 +126,15 @@ def get_qb_pass(df: pd.DataFrame = None):
 
 
 def get_rushing(df: pd.DataFrame = None):
+    """
+    A function that returns a dataframe of rushing stats
+
+    Args:
+        df (pd.DataFrame): Must be a dataframe of play-by-play data
+
+    Returns:
+        df (pd.DataFrame): A dataframe of each player's rushing stats
+    """
 
     run_df = (
         df[df['rush_attempt'] == 1]
@@ -160,6 +178,15 @@ def get_rushing(df: pd.DataFrame = None):
 
 
 def get_opp_pass(df: pd.DataFrame = None):
+    """
+    A function that returns a dataframe of opponent passing stats
+
+    Args:
+        df (pd.DataFrame,): A dataframe of play-by-play data
+
+    Returns:
+        df: A dataframe of each team's opponent's passing stats
+    """
 
     opp_pass = (
         df[df['pass_attempt'] == 1]
@@ -173,6 +200,15 @@ def get_opp_pass(df: pd.DataFrame = None):
 
 
 def get_opp_rush(df: pd.DataFrame = None):
+    """
+    A function that returns a dataframe of opponent rushing stats
+
+    Args:
+        df (pd.DataFrame): A dataframe of play-by-play data
+
+    Returns:
+        df: A dataframe of each team's opponent's rushing stats
+    """
 
     opp_rush = (
         df[df['rush_attempt'] == 1]
@@ -186,6 +222,15 @@ def get_opp_rush(df: pd.DataFrame = None):
 
 
 def get_def_stats(df: pd.DataFrame = None):
+    """
+    A function that returns a dataframe of defensive stats
+
+    Args:
+        df: A dataframe of play-by-play data
+
+    Returns:
+        df: A dataframe of each team's defensive stats
+    """
 
     def_cols = ['interception', 'season', 'return_touchdown', 'fumble',
                 'sack', 'epa']
@@ -215,6 +260,15 @@ def get_def_stats(df: pd.DataFrame = None):
 
 
 def get_kicker_stats(df: pd.DataFrame = None):
+    """
+    A function that returns a dataframe of kicker stats
+
+    Args:
+        df (pd.DataFrame): A dataframe of play-by-play data
+
+    Returns:
+        df (pd.DataFrame): A dataframe of each kicker's stats
+    """
 
     kicks = ['field_goal', 'extra_point']
 
@@ -258,13 +312,13 @@ def get_team_adjusted_epa(df: pd.DataFrame = None):
 
     Returns:
         pd.DataFrame: A dataframe with team adjusted Defensive EPA.
-    """    
+    """
 
-    def_epa_cols = ['game_id', 'season', 'posteam', 'defteam', 'epa', 
+    def_epa_cols = ['game_id', 'season', 'posteam', 'defteam', 'epa',
                     'play_type']
-    
+
     if not all([x in df.columns for x in def_epa_cols]):
-        
+
         raise ValueError('Dataframe must contain columns: game_id, season, posteam, defteam, \
                          epa, play_type')
 
@@ -288,6 +342,16 @@ def get_team_adjusted_epa(df: pd.DataFrame = None):
 
 
 def get_team_pass_yds(df: pd.DataFrame = None):
+    """
+    A function that returns a dataframe of each team's passing yards
+    for each game
+
+    Args:
+        df (pd.DataFrame, optional): A dataframe of play-by-play data.
+
+    Returns:
+        df (pd.DataFrame): A dataframe of each team's passing yards
+    """
 
     team_pass_yds = (
         df.loc[df['pass_attempt'] == 1]
@@ -301,6 +365,16 @@ def get_team_pass_yds(df: pd.DataFrame = None):
 
 
 def get_team_rush_yds(df: pd.DataFrame = None):
+    """
+    A function that returns a dataframe of each team's rushing yards
+    for each game
+
+    Args:
+        df (pd.DataFrame, optional): A dataframe of play-by-play data.
+
+    Returns:
+        df (pd.DataFrame): A dataframe of each team's rushing yards
+    """
 
     team_rush_yds = (
         df.loc[df['rush_attempt'] == 1]
@@ -314,6 +388,15 @@ def get_team_rush_yds(df: pd.DataFrame = None):
 
 
 def get_team_scores(df: pd.DataFrame = None):
+    """
+    A function that returns each team's offensive scores (TD, FG, etc.)
+
+    Args:
+        df (pd.DataFrame, optional): A dataframe of play-by-play data.
+
+    Returns:
+        df (pd.DataFrame): A dataframe of each team's offensive scores
+    """
 
     condition = df['td_team'] == df['posteam']
 
@@ -334,9 +417,24 @@ def get_team_scores(df: pd.DataFrame = None):
 
 
 def get_game_results(df: pd.DataFrame = None, team_rush_yds: pd.DataFrame = None,
-                     team_pass_yds: pd.DataFrame = None, team_scores: pd.DataFrame = None, 
-                     opp_rush: pd.DataFrame = None, opp_pass: pd.DataFrame = None, 
+                     team_pass_yds: pd.DataFrame = None, team_scores: pd.DataFrame = None,
+                     opp_rush: pd.DataFrame = None, opp_pass: pd.DataFrame = None,
                      ls: pd.DataFrame = None):
+    """
+    A dataframe returning each team's aggregate stats for each game
+
+    Args:
+        df (pd.DataFrame, optional): _description_. Defaults to None.
+        team_rush_yds (pd.DataFrame, optional): _description_. Defaults to None.
+        team_pass_yds (pd.DataFrame, optional): _description_. Defaults to None.
+        team_scores (pd.DataFrame, optional): _description_. Defaults to None.
+        opp_rush (pd.DataFrame, optional): _description_. Defaults to None.
+        opp_pass (pd.DataFrame, optional): _description_. Defaults to None.
+        ls (pd.DataFrame, optional): _description_. Defaults to None.
+
+    Returns:
+        df (pd.DataFrame): A dataframe of each team's aggregate stats for each game
+    """
 
     game_results_cols = ['year', 'week', 'season_type', 'home_team', 'away_team',
                          'home_score', 'away_score', 'spread_line', 'total_line']
@@ -395,6 +493,16 @@ def get_game_results(df: pd.DataFrame = None, team_rush_yds: pd.DataFrame = None
 
 
 def get_drive_stats(df: pd.DataFrame = None):
+    """
+    A function that returns the results of each drive for each team
+    for each game
+
+    Args:
+        df (pd.DataFrame, optional): A dataframe of play-by-play data.
+
+    Returns:
+        df (pd.DataFrame): A dataframe of each team's drive results for each game
+    """
 
     drive_cols = ['time_between', 'score_differential', 'score_differential_post', 'rush_attempt',
                   'pass_attempt', 'yards_gained', 'interception', 'fumble', 'sack', 'epa',
@@ -439,6 +547,15 @@ def get_drive_stats(df: pd.DataFrame = None):
 
 
 def get_receiving(df: pd.DataFrame = None):
+    """
+    A function returning each player's receiving stats for each game.
+
+    Args:
+        df (pd.DataFrame, optional): A dataframe of play-by-play data.
+
+    Returns:
+        df (pd.DataFrame): A dataframe of each player's receiving stats for each game
+    """
 
     rec_df = (
         df.loc[df['qb_dropback'] == 1]
@@ -485,59 +602,78 @@ def get_receiving(df: pd.DataFrame = None):
 
     return rec_df
 
-def get_opp_pass(df: pd.DataFrame = None):
 
-  opp_pass = (
+def get_opp_pass(df: pd.DataFrame = None):
+    """
+    A function returning each opponent's passing stats for each game.
+
+    Args:
+        df (pd.DataFrame, optional): A dataframe of play-by-play data.
+
+    Returns:
+        df (pd.DataFrame): A dataframe of each opponent's passing stats for each game
+    """
+
+    opp_pass = (
       df[df['pass_attempt'] == 1]
       .groupby(['game_id', 'defteam'], as_index=False)['yards_gained']
       .sum()
       .rename(columns={'defteam' : 'team',
                       'yards_gained' : 'opp_pass_yds'})
   )
+    
+    return opp_pass   
 
-  return opp_pass
 
-def get_opp_rush(df: pd.DataFrame = None):
-
-  opp_rush = (
-      df[df['rush_attempt'] == 1]
-      .groupby(['game_id', 'defteam'], as_index=False)['yards_gained']
-      .sum()
-      .rename(columns={'defteam' : 'team',
-                      'yards_gained' : 'opp_rush_yds'})
-  )
-
-  return opp_rush
 
 def get_def_stats(df: pd.DataFrame = None):
+    """
+    A function returning each team's defensive stats for each game.
+    
+    Args:
+        df (pd.DataFrame, optional): A dataframe of play-by-play data.
 
-  def_cols = ['interception', 'season', 'return_touchdown', 'fumble', 
-              'sack', 'epa']
+    Returns:
+        df (pd.DataFrame): A dataframe of each team's defensive stats for each game
+    """    
 
-  def_stats = (
-      df[~df['desc'].str.contains('Aborted')].copy()
-      .groupby(['game_id', 'defteam'], as_index=False)
-      .agg({
-          'interception' : 'sum',
-          'season' : lambda x: x.unique()[0],
-          'return_touchdown' : 'sum',
-          'fumble_lost' : 'sum',
-          'sack' : 'sum',
-          'safety' : 'sum',
-          'blocked_player_name' : 'sum'
-      })
-      .rename(columns={
-          'defteam' : 'team',
-          'interception' : 'def_int',
-          'return_touchdown' : 'def_td',
-          'sack' : 'def_sack',
-          'fumble' : 'def_fumble',
-          'blocked_player_name' : 'kick_blocked'})
-  )
+    def_cols = ['interception', 'season', 'return_touchdown', 'fumble', 
+                'sack', 'epa']
+
+    def_stats = (
+        df[~df['desc'].str.contains('Aborted')].copy()
+        .groupby(['game_id', 'defteam'], as_index=False)
+        .agg({
+            'interception' : 'sum',
+            'season' : lambda x: x.unique()[0],
+            'return_touchdown' : 'sum',
+            'fumble_lost' : 'sum',
+            'sack' : 'sum',
+            'safety' : 'sum',
+            'blocked_player_name' : 'sum'
+        })
+        .rename(columns={
+            'defteam' : 'team',
+            'interception' : 'def_int',
+            'return_touchdown' : 'def_td',
+            'sack' : 'def_sack',
+            'fumble' : 'def_fumble',
+            'blocked_player_name' : 'kick_blocked'
+        })
+    )
   
     return def_stats
 
 def process_pbp(df: pd.DataFrame = None):
+    """
+    A function that processes pbp data to add useful features.
+    
+    Args:
+        df (pd.DataFrame, optional): A dataframe of play-by-play data.
+
+    Returns:
+        df (pd.DataFrame): A dataframe of play-by-play data with added features
+    """    
     df['year'] = pd.to_datetime(df['game_date']).dt.year
     df['two_point_conv_result'] = (
         df['two_point_conv_result']
