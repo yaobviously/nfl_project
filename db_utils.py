@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine
 import io
 import psycopg2
+
+from sqlalchemy import create_engine
 
 
 def create_table(df=None, table_name=None, URI=None):

@@ -3,3 +3,6 @@ env.txt
 
 # pipfile
 Pipfile
+
+# pycache
+/__pycache__
