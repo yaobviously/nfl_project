@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-def get_qb_pass(df=None):
+def get_qb_pass(df: pd.DataFrame = None):
     qb_df = (
         df.loc[((df['pass_attempt'] == 1) & (
             ~df['play_type'].isin(['two_point_att']) & (df['sack'] == 0)))]
@@ -116,7 +116,7 @@ def get_qb_pass(df=None):
     return qb_df
 
 
-def get_rushing(df=None):
+def get_rushing(df: pd.DataFrame = None):
 
     run_df = (
         df[df['rush_attempt'] == 1]
@@ -159,7 +159,7 @@ def get_rushing(df=None):
     return run_df
 
 
-def get_opp_pass(df=None):
+def get_opp_pass(df: pd.DataFrame = None):
 
     opp_pass = (
         df[df['pass_attempt'] == 1]
@@ -172,7 +172,7 @@ def get_opp_pass(df=None):
     return opp_pass
 
 
-def get_opp_rush(df=None):
+def get_opp_rush(df: pd.DataFrame = None):
 
     opp_rush = (
         df[df['rush_attempt'] == 1]
@@ -185,7 +185,7 @@ def get_opp_rush(df=None):
     return opp_rush
 
 
-def get_def_stats(df=None):
+def get_def_stats(df: pd.DataFrame = None):
 
     def_cols = ['interception', 'season', 'return_touchdown', 'fumble',
                 'sack', 'epa']
@@ -214,7 +214,7 @@ def get_def_stats(df=None):
     return def_stats
 
 
-def get_kicker_stats(df=None):
+def get_kicker_stats(df: pd.DataFrame = None):
 
     kicks = ['field_goal', 'extra_point']
 
@@ -245,10 +245,28 @@ def get_kicker_stats(df=None):
     return kick_df
 
 
-def get_team_adjusted_epa(df=None):
+def get_team_adjusted_epa(df: pd.DataFrame = None):
+    """
+    Processes play-by-play data to calculate team adjusted Defensive EPA.
 
-    def_epa_cols = ['game_id', 'season',
-                    'posteam', 'defteam', 'epa', 'play_type']
+    Args:
+        df (pandas dataframe): Must be a play-by-play dataframe with game_id, season, posteam, \
+            defteam, epa, play_type columns.
+
+    Raises:
+        ValueError: If dataframe does not contain required columns.
+
+    Returns:
+        pd.DataFrame: A dataframe with team adjusted Defensive EPA.
+    """    
+
+    def_epa_cols = ['game_id', 'season', 'posteam', 'defteam', 'epa', 
+                    'play_type']
+    
+    if not all([x in df.columns for x in def_epa_cols]):
+        
+        raise ValueError('Dataframe must contain columns: game_id, season, posteam, defteam, \
+                         epa, play_type')
 
     season_epa_def = (
         df[df['play_type'].isin(['pass', 'run'])][def_epa_cols]
@@ -269,7 +287,7 @@ def get_team_adjusted_epa(df=None):
     return season_epa_def
 
 
-def get_team_pass_yds(df=None):
+def get_team_pass_yds(df: pd.DataFrame = None):
 
     team_pass_yds = (
         df.loc[df['pass_attempt'] == 1]
@@ -282,7 +300,7 @@ def get_team_pass_yds(df=None):
     return team_pass_yds
 
 
-def get_team_rush_yds(df=None):
+def get_team_rush_yds(df: pd.DataFrame = None):
 
     team_rush_yds = (
         df.loc[df['rush_attempt'] == 1]
@@ -295,7 +313,7 @@ def get_team_rush_yds(df=None):
     return team_rush_yds
 
 
-def get_team_scores(df=None):
+def get_team_scores(df: pd.DataFrame = None):
 
     condition = df['td_team'] == df['posteam']
 
@@ -315,7 +333,10 @@ def get_team_scores(df=None):
     return team_scores
 
 
-def get_game_results(df=None, team_rush_yds=None, team_pass_yds=None, team_scores=None, opp_rush=None, opp_pass=None, ls=None):
+def get_game_results(df: pd.DataFrame = None, team_rush_yds: pd.DataFrame = None,
+                     team_pass_yds: pd.DataFrame = None, team_scores: pd.DataFrame = None, 
+                     opp_rush: pd.DataFrame = None, opp_pass: pd.DataFrame = None, 
+                     ls: pd.DataFrame = None):
 
     game_results_cols = ['year', 'week', 'season_type', 'home_team', 'away_team',
                          'home_score', 'away_score', 'spread_line', 'total_line']
@@ -373,7 +394,7 @@ def get_game_results(df=None, team_rush_yds=None, team_pass_yds=None, team_score
     return game_results
 
 
-def get_drive_stats(df=None):
+def get_drive_stats(df: pd.DataFrame = None):
 
     drive_cols = ['time_between', 'score_differential', 'score_differential_post', 'rush_attempt',
                   'pass_attempt', 'yards_gained', 'interception', 'fumble', 'sack', 'epa',
@@ -417,7 +438,7 @@ def get_drive_stats(df=None):
     return drive_details
 
 
-def get_receiving(df=None):
+def get_receiving(df: pd.DataFrame = None):
 
     rec_df = (
         df.loc[df['qb_dropback'] == 1]
@@ -463,3 +484,82 @@ def get_receiving(df=None):
     rec_df.drop(columns='team_targets', inplace=True)
 
     return rec_df
+
+def get_opp_pass(df: pd.DataFrame = None):
+
+  opp_pass = (
+      df[df['pass_attempt'] == 1]
+      .groupby(['game_id', 'defteam'], as_index=False)['yards_gained']
+      .sum()
+      .rename(columns={'defteam' : 'team',
+                      'yards_gained' : 'opp_pass_yds'})
+  )
+
+  return opp_pass
+
+def get_opp_rush(df: pd.DataFrame = None):
+
+  opp_rush = (
+      df[df['rush_attempt'] == 1]
+      .groupby(['game_id', 'defteam'], as_index=False)['yards_gained']
+      .sum()
+      .rename(columns={'defteam' : 'team',
+                      'yards_gained' : 'opp_rush_yds'})
+  )
+
+  return opp_rush
+
+def get_def_stats(df: pd.DataFrame = None):
+
+  def_cols = ['interception', 'season', 'return_touchdown', 'fumble', 
+              'sack', 'epa']
+
+  def_stats = (
+      df[~df['desc'].str.contains('Aborted')].copy()
+      .groupby(['game_id', 'defteam'], as_index=False)
+      .agg({
+          'interception' : 'sum',
+          'season' : lambda x: x.unique()[0],
+          'return_touchdown' : 'sum',
+          'fumble_lost' : 'sum',
+          'sack' : 'sum',
+          'safety' : 'sum',
+          'blocked_player_name' : 'sum'
+      })
+      .rename(columns={
+          'defteam' : 'team',
+          'interception' : 'def_int',
+          'return_touchdown' : 'def_td',
+          'sack' : 'def_sack',
+          'fumble' : 'def_fumble',
+          'blocked_player_name' : 'kick_blocked'})
+  )
+  
+    return def_stats
+
+def process_pbp(df: pd.DataFrame = None):
+    df['year'] = pd.to_datetime(df['game_date']).dt.year
+    df['two_point_conv_result'] = (
+        df['two_point_conv_result']
+        .map(
+            {'success' : 1,
+            'failure' : 0,
+            }
+        )
+        .fillna('None')
+    )
+
+    df['game_date'] = pd.to_datetime(df['game_date'])
+    df['spread_line'] = df['spread_line'] * -1
+    df['field_goal_result'] = np.where(df['field_goal_result'] == 'made', 1, 0)
+    df['time_between'] = df.groupby(['game_id'])['game_seconds_remaining'].transform(lambda x: x.sub(x.shift(-1)).fillna(0))
+    df['play_type'] = np.where(df['two_point_attempt'] > 0.5, 'two_point_att', df['play_type'])
+    df['air_yards_to_sticks'] = df['air_yards'].sub(df['ydstogo'])
+    df['season'] = [int(x.split('_')[0]) for x in df.game_id]
+    df['blocked_player_name'] = np.where(df['blocked_player_name'].notnull(), 1, 0)
+    df['fg_0_39'] = np.where(((df['play_type'] == 'field_goal') & (df['kick_distance'].between(0,39))), 1, 0)
+    df['fg_40_49'] = np.where(((df['play_type'] == 'field_goal') & (df['kick_distance'].between(40,49))), 1, 0)
+    df['fg_50_on'] = np.where(((df['play_type'] == 'field_goal') & (df['kick_distance'].between(50,100))), 1, 0)
+    df['extra_point_result'] = np.where(df['extra_point_result'] == 'good', 1, 0)
+    
+    return df
