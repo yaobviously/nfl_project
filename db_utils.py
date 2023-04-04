@@ -2,19 +2,6 @@ from sqlalchemy import create_engine
 import io
 import psycopg2
 
-# loading up the postgres credentials in a separate file. we could use environment variables
-# but doing it this way to mix it up!
-
-with open('../env.txt', 'r') as file:
-    env = file.read().splitlines()
-    user = env[0]
-    password = env[1]
-    host = env[2]
-    database = env[3]
-    port = env[4]
-
-URI = f'postgresql://{user}:{password}@{host}:{port}/{database}'
-
 
 def create_table(df=None, table_name=None, URI=None):
     """
@@ -41,28 +28,28 @@ def populate_table(df=None, table_name=None, URI=None):
     """
 
     engine = create_engine(URI)
+    conn = engine.raw_connection()
     print('connected to the database..')
 
-    df.head(0).to_sql(table_name, engine, if_exists='replace', index=False)
+    try:
+        df.head(0).to_sql(table_name, engine, if_exists='replace', index=False)
 
-    conn = engine.raw_connection()
-    cur = conn.cursor()
-    print('creating the cursor..')
-
-    output = io.StringIO()
-
-    print('writing the csv to file..')
-
-    df.to_csv(output, sep='\t', header=False, index=False)
-    output.seek(0)
-
-    contents = output.getvalue()
-
-    cur.copy_from(output, table_name, null="")  # null values become ''
-
-    cur.close()
-    conn.commit()
-    conn.close()
+        with conn.cursor() as cur, io.StringIO() as output:
+            print('creating the cursor..')
+            print('writing the csv to file..')
+            df.to_csv(output, sep='\t', header=False,
+                      index=False, encoding='utf-8')
+            output.seek(0)
+            cur.copy_from(output, table_name, null="") 
+        conn.commit()
+        print('data inserted into table successfully!')
+    
+    except:
+        print('Error: unable to populate the table.')
+        conn.rollback()
+    
+    finally:
+        conn.close()
 
 
 def insert_into_table(df=None, table_name=None, URI=None):
@@ -70,23 +57,37 @@ def insert_into_table(df=None, table_name=None, URI=None):
     Insert new data into the table.
     """
 
+    if df is None:
+        raise ValueError("Error: df is None")
+
     engine = create_engine(URI)
 
     conn = engine.raw_connection()
     cur = conn.cursor()
 
-    output = io.StringIO()
+    try:
+        output = io.StringIO()
 
-    df.to_csv(output, sep='\t', header=False, index=False)
-    output.seek(0)
+        df.to_csv(output, sep='\t', header=False,
+                  index=False, encoding='utf-8')
+        output.seek(0)
 
-    contents = output.getvalue()
+        cur.copy_from(output, table_name, null="")
 
-    cur.copy_from(output, table_name, null="")
+        conn.commit()
+        cur.close()
+        conn.close()
 
-    conn.commit()
-    cur.close()
-    conn.close()
+    except (psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
+        print(f"Error: unable to insert data into the table. {e}")
+        conn.rollback()
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+    finally:
+        cur.close()
+        conn.close()
 
 
 def drop_table(table_name=None, URI=None):
