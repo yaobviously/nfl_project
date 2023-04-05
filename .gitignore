@@ -2,7 +2,7 @@
 .env
 
 # pipfile
-Pipfile.lock
+Pipfile
 
 # pycache
 /__pycache__
