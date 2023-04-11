@@ -5,7 +5,7 @@ import numpy as np
 
 def get_qb_pass(df: pd.DataFrame = None):
     """
-    Get QB passing statistics
+    Get QB passing stats from raw play-by-play data
 
     Args:
         df (pd.DataFrame): Must be a pandas dataframe with play by play data
