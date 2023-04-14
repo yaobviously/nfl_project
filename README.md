@@ -11,7 +11,7 @@ In the [db_insert notebook](https://github.com/yaobviously/nfl_project/blob/main
 
 # Packages
 
-I ise sqlalchemy and psycopg2 to interact with my PostgreSQL hosted on Heroku. SQL, pandas, and sklearn are used for data preparation and preprocessing. The models are built using sklearn, bambi, and tensorflow. 
+SQLalchemy and psycopg2 are used to interact with the PostgreSQL hosted on Heroku. SQL, pandas, and sklearn are used for data preparation and preprocessing. The models are built using sklearn, bambi, and tensorflow. 
 
 # Note
 
