@@ -1,6 +1,6 @@
 # NFL Project
 
-This project analyses and models NFL data to predict NFL player fantasy performance for the purpose of competing in Daily Fantasy Sports competitions. While that may seem mundane, the contests are unique in that they require competitors to consider the full distribution of outcomes when choosing their team. To accomplish this I used Bayesian Generalized Linear Mixed Models (GLLMs) and Bayesian Neural Networks, which were built using the Bambi package (a wrapper for PyMc3) and TensorFlow Probability.
+This project analyses and models NFL data to predict NFL player fantasy performance for the purpose of competing in Daily Fantasy Sports competitions. While that may seem mundane, the contests are unique in that they require competitors to consider the full distribution of outcomes when choosing their team. To accomplish this I used Bayesian Generalized Linear Mixed Models and Bayesian Neural Networks, which were built using the Bambi package (a wrapper for PyMc) and TensorFlow Probability.
 
 These models capture the inherent uncertainty of NFL player production. They were also fun to build.
 
